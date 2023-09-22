@@ -1,0 +1,45 @@
+RDHT cipher explainer:
+There are two primary components of the RDHT cipher.
+1-Preprocessing:
+Preprocessing requires an unpredictable stream of numbers ranging from 0-25 inclusive(ie 0 and 25 are valid).
+There should be one random number in the stream per plaintext character.
+We preprocess each plaintext character(once appropiately encoded into the 0-25 range) by calculating the following:
+p=plaintext number
+r=random number
+a=(2p+r)%26
+b=(p+r)%26
+Each post processed plaintext character will be represented by two numbers.
+This stream is fed into the next step.
+2-Double Columnar Transposition:
+We perform two columnar transpositions, each using a key that is not even and co prime to each other.
+
+Step by step explaination:
+Encrypting:
+Assume we have a plaintext character stream A-Z.
+1-Strip all symbols, punctuation, and spaces.
+2-Encode each character into a number 0-25.The stream should look like (p1,p2,p3,...,pn).
+3-Create an unpredictable random stream of numbers ranging 0-25 inclusive(0 and 25 are valid). We will label this stream like(r1,r2,r3,...,rn). The stream of random numbers should be equal in length to the plaintext stream.
+4-Compute for each plaintext:
+ai=(2pi+ri)%26
+bi=(pi+ri)%26
+The resulting stream should look like(a1,b1,a2,b2,a3,b3,...,an,bn)
+4-Encode each number in the generated stream as a character(ie A-Z).
+5-Carry out the first columnar transposition using the first key. See https://en.wikipedia.org/wiki/Transposition_cipher for instructions.
+6-Carry out the second columnar transposition on the result of the last step using the second key. The final result is your ciphertext.
+Decrypting:
+1-Undo the outer layer of columnar transposition using the second key.
+2-Undo the inner layer of columnar transposition using the first key.
+3-Convert the stream into numbers 0-25(0 and 25 are valid).
+4-For each pair of numbers a and b in the stream, compute the following
+x=a-b
+4a-If x is less than 0, add 26 to x
+4b-If x is equal or greater to 0, procede
+5-Once each pair has been processed, convert the resulting stream of numbers into characters A-Z. This is your plaintext.
+
+Code:
+Github repository at https://github.com/cryptoam322/RHDT-cipher/tree/main
+Online version at https://onlinegdb.com/HnNYlOjT0
+
+Recommendations for usage:
+1-Ensure your two columnar transposition keys are large, not even, coprime, and ideally random. For best results, ensure that the keys are also coprime to the plaintext length.
+2-Ensure that the random number stream used in the preprocessing stage during encryption is genuinely random. This means that the random numbers should be equidistribiuted over 0-25 inclusive(0 and 25 are valid) and that no one should be able to predict any number in the stream better than 1/26 chance. Using dice is a good source of randomness but you will need to carefully combine dice rolls to generate the equidsitributed numbers.
